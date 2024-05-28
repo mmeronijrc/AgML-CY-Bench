@@ -9,7 +9,7 @@ AgML aspires to
 
 
 ## AgML Crop Yield Forecasting
-The objective of AgML Crop Yield Forecasting task is to create a benchmark to compare models for crop yield forecasting across countries and crops. The models and forecasts can be used for food security planning or famine early warning. The benchmark is called CY-Bench (crop yield benchmark).
+The objective of AgML Crop Yield Forecasting task is to create a benchmark to compare models for crop yield forecasting across countries and crops. The models and forecasts can be used for food security planning or famine early warning. The benchmark is called CYbench (crop yield benchmark).
 
 ### Table of contents
 * [Overview](#overview)
