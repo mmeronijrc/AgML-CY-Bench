@@ -1,5 +1,6 @@
 import os
 
+import numpy as np
 import pandas as pd
 
 import config
@@ -130,6 +131,17 @@ def _align_data(df_y: pd.DataFrame, dfs_x: tuple) -> tuple:
 def load_dfs_test_softwheat_nl() -> tuple:
     path_data_nl = os.path.join(config.PATH_DATA_DIR, "data_NL")
 
+    # TODO -- read crop calendar
+
+    # Read crop calendar
+    harvest_date = '12-31'  # TODO -- sensible dates
+    sowing_date = '03-24'
+    pre_sowing_timelength = 0  # TODO
+
+    #
+    # Soil
+    #
+
     df_y = pd.read_csv(
         os.path.join(path_data_nl, "YIELD_NUTS2_NL.csv"),
         index_col=["loc_id", "year"],
@@ -142,20 +154,65 @@ def load_dfs_test_softwheat_nl() -> tuple:
         index_col=["loc_id"],
     )[["sm_wp", "sm_fc", "sm_sat", "rooting_depth"]]
 
+    #
+    # Meteo
+    #
+
     df_x_meteo = pd.read_csv(
         os.path.join(path_data_nl, "METEO_DAILY_NUTS2_NL.csv"),
     )
 
-    df_x_meteo["date"] = pd.to_datetime(df_x_meteo["date"], format="%Y%m%d").dt.date
+    df_x_meteo["date"] = pd.to_datetime(df_x_meteo["date"], format="%Y%m%d")
     df_x_meteo["year"] = df_x_meteo["date"].apply(lambda date: date.year)
+
+    dfs_x_meteo = []
+    for group, df_group in df_x_meteo.groupby(["loc_id", "year"]):
+        loc_id, year = group
+
+        # TODO -- obtain dates corresponding to crop and location from crop calendar
+
+        df_group.set_index('date', inplace=True)
+        df_group.resample('D').ffill()
+
+        # TODO -- select data based on dates
+
+        df_group.reset_index(inplace=True)
+        dfs_x_meteo.append(df_group)
+
+    df_x_meteo = pd.concat(dfs_x_meteo)
     df_x_meteo.set_index(["loc_id", "year", "date"], inplace=True)
+
+    #
+    # Remote sensing
+    #
 
     df_x_rs = pd.read_csv(
         os.path.join(path_data_nl, "REMOTE_SENSING_NUTS2_NL.csv"),
     )
 
-    df_x_rs["date"] = pd.to_datetime(df_x_rs["date"], format="%Y%m%d").dt.date
+    df_x_rs["date"] = pd.to_datetime(df_x_rs["date"], format="%Y%m%d")
     df_x_rs["year"] = df_x_rs["date"].apply(lambda date: date.year)
+
+    dfs_x_rs = []
+    for group, df_group in df_x_rs.groupby(["loc_id", "year"]):
+        loc_id, year = group
+
+        # date_s = np.datetime64(f'{year}-{sowing_date}')
+        # date_h = np.datetime64(f'{year}-{harvest_date}')  # TODO -- deal with sowing in previous year
+
+        # season_length = date_h - date_s + np.timedelta64(pre_sowing_timelength, 'D')
+        #
+        # cutoff_date = date_h - season_length // 2
+
+        df_group.set_index('date', inplace=True)
+        df_group.resample('D').ffill()
+        # df_group = df_group[cutoff_date:]
+
+        df_group.reset_index(inplace=True)
+        dfs_x_rs.append(df_group)
+
+    df_x_rs = pd.concat(dfs_x_rs)
+
     df_x_rs.set_index(["loc_id", "year", "date"], inplace=True)
 
     dfs_x = (

@@ -235,8 +235,6 @@ class Dataset:
                 data_loc = {key: df_loc[key].values for key in df_loc.columns}
                 dates = {key: df_loc.index.values for key in df_loc.columns}
 
-                dates = {key: df_loc.index.values for key in df_loc.columns}
-
                 data = {
                     **data_loc,
                     **data,
